@@ -1,0 +1,1 @@
+export const IMAGE_URL = 'https://core2.jjm-manufacturing.com/'
