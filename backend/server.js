@@ -8,10 +8,11 @@ const productRoutes = require('./routes/productRoutes')
 const cartRoutes = require('./routes/cartRoutes')
 const ordersRoutes = require('./routes/ordersRoutes')
 const finishGoodsRoutes = require('./routes/finishGoodsRoutes')
-const rawMaterialRoutes = require('./routes/rawMaterialRoutes')
 const addressRoutes = require('./routes/addressRoutes')
 const path = require('path');
 const AIRoutes = require('./routes/AIRoutes')
+const taskRoutes = require('./routes/taskRoutes')
+const AIMaintenanceRoutes = require('./routes/AIMaintenanceRoutes')
 
 const app = express()
 app.use(express.json())
@@ -36,9 +37,10 @@ app.use('/api', productRoutes)
 app.use('/api', cartRoutes)
 app.use('/api', ordersRoutes)
 app.use('/api', finishGoodsRoutes)
-app.use('/api', rawMaterialRoutes)
 app.use('/api', addressRoutes)
 app.use('/api', AIRoutes)
+app.use('/api', taskRoutes)
+app.use('/api', AIMaintenanceRoutes)
 
 
 

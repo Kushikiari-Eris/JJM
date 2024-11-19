@@ -4,13 +4,16 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import axios from 'axios';
 import { Card, CardBody, Typography } from '@material-tailwind/react';
+import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Orders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('All');
-    const [selectedOrder, setSelectedOrder] = useState(null); // New state for selected order
+    const [selectedOrder, setSelectedOrder] = useState(null); 
+    const [cancelOrderId, setCancelOrderId] = useState(null);
 
     const userId = Cookies.get('userId');
 
@@ -38,8 +41,53 @@ const Orders = () => {
         document.getElementById('my_modal_1').showModal();
     };
 
+    const openCancelModal = (orderId) => {
+        setCancelOrderId(orderId);
+        document.getElementById('cancel_order_modal').showModal();
+    };
+
+
+    const handleCancelOrder = async () => {
+        try {
+            // Send the request to update the status to 'Cancelled'
+            await axios.patch(`http://localhost:7684/api/orders/${cancelOrderId}/cancel`, {
+                status: 'Cancelled', // Explicitly specify the status
+            });
+    
+            // Update the state locally
+            setOrders(orders.map(order => 
+                order._id === cancelOrderId ? { ...order, status: 'Cancelled' } : order
+            ));
+
+            Swal.fire({
+                title: 'Order Cancelled Successfully!',
+                text: 'Your order has been cancelled.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        } catch (err) {
+            console.error('Error cancelling the order:', err.message);
+        } finally {
+            // Close the modal and reset the cancelOrderId
+            document.getElementById('cancel_order_modal').close();
+            setCancelOrderId(null);
+        }
+    };
+    
+
+
     if (loading) {
-        return <div>Loading...</div>;
+        return <div>{loading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+            <div class="flex items-center justify-center h-screen">
+                <div class="relative">
+                    <div class="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                    <div class="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin">
+                    </div>
+                </div>
+            </div>
+            </div>
+        )}</div>;
     }
 
     const tabItems = [
@@ -88,7 +136,7 @@ const Orders = () => {
                         </li>
                     ))}
                 </ul>
-
+                        
                 <div className="p-4">
                     {activeTab === 'All' && 
                         <div className='flex-grow'>
@@ -100,10 +148,26 @@ const Orders = () => {
                                                 <h2 className='text-lg font-bold flex'>
                                                     Your Order 
                                                     {/* Delivery Status */}
-                                                    <p className={`text-sm font-medium mt-1 ml-2 ${order.status === 'Pending' ? 'text-orange-600' : order.status === 'Confirmed' ? 'text-green-600' : 'text-gray-600'}`}>
-                                                        {order.status === 'Pending' && '⏳'}
-                                                        {order.status === 'Confirmed' && '✔'}
-                                                        {order.status}
+                                                    <p 
+                                                        className={`text-sm font-medium mt-1 ml-2 ${
+                                                            {
+                                                                Pending: 'text-orange-600',
+                                                                Confirmed: 'text-green-600',
+                                                                Cancelled: 'text-red-600',
+                                                                Shipped: 'text-blue-600',
+                                                                Delivered: 'text-purple-600',
+                                                            }[order.status] || 'text-gray-600'
+                                                        }`}
+                                                    >
+                                                        {
+                                                            {
+                                                                Pending: '⏳ Pending',
+                                                                Confirmed: '✔ Confirmed',
+                                                                Cancelled: '❌ Cancelled',
+                                                                Shipped: '🚚 Shipped',
+                                                                Delivered: '📦 Delivered',
+                                                            }[order.status] || order.status
+                                                        }
                                                     </p>
                                                 </h2>
                                                 <div className='flex mt-5 text-sm'>
@@ -147,9 +211,18 @@ const Orders = () => {
                                                     View Details
                                                 </button>
                                                 {order.status === 'Pending' && (
-                                                    <button className="ml-2 px-4 py-2 text-orange-600 rounded-md" onClick={() => cancelOrder(order._id)}>
+                                                    <button className="ml-2 px-4 py-2 text-orange-600 rounded-md" onClick={() => openCancelModal(order._id)}>
                                                         Cancel Order
                                                     </button>
+                                                )}
+                                               {order.status === 'Cancelled' && order.items.length > 0 && (
+                                                    <Link to={`/market/productDetail/${order.items[0].productId}`}>
+                                                        <button 
+                                                            className="ml-2 px-4 py-2 text-orange-600 rounded-md"
+                                                        >
+                                                            Buy Again
+                                                        </button>
+                                                    </Link>
                                                 )}
                                             </div>
                                         </div>
@@ -165,40 +238,117 @@ const Orders = () => {
                     {activeTab === 'To Ship' && <div>No Orders Yet.</div>}
                     {activeTab === 'To Delivered' && <div>No Orders Yet.</div>}
                     {activeTab === 'Completed' && <div>No Orders Yet.</div>}
+
+                    
                 </div>
 
                 {/* Modal for selected order */}
                 <dialog id="my_modal_1" className="modal">
-                    <div className="modal-box w-11/12 max-w-4xl p-6">
-                    <h3 className="font-bold text-lg mb-10">Order Details</h3>
+                    <div className="modal-box w-full sm:w-11/12 md:max-w-4xl p-7">
+                        <h3 className="font-bold text-2xl mb-1">Thank you for your order</h3>
+                        <p className='mb-10 text-sm tracking-wide'>We appreciate your order, we're currently processing it. So hold tight, and we will send you confirmation very soon!</p>
                         {selectedOrder ? (
-                             <Card className="border border-gray-300 !rounded-md shadow-sm">
-                             <CardBody className="md:px-2">
-                               {selectedOrder.items.map((item, index) => (
-                                   <div key={index} className="grid grid-cols-5 items-center gap-1  ml-3">
-                                       <img
-                                           src={`http://localhost:7684/uploads/${item.image}`}
-                                           className=" w-40 h-40 object-cover rounded row-span-1"
-                                       />
-                                       <div className="col-span-3 ml-3">
-                                           <Typography variant="h6" color="blue-gray" className="text-base mb-1">
-                                               {item.productName}
-                                           </Typography>
-                                           <Typography className="font-normal text-gray-600 mb-0.5">
-                                               Size: {item.size}
-                                           </Typography>
-                                           <Typography className="font-normal text-gray-600 mb-0.5">
-                                               Quantity: {item.productQuantity}
-                                           </Typography>
-                                           <Typography className="font-normal text-gray-600 mb-0.5">
-                                               Price: ₱{item.price}
-                                           </Typography>
-                                       </div>
-                                   </div>
-                               ))}
-                         
-                             </CardBody>
-                           </Card>
+                            <div>
+                                <div className='flex pb-4 tracking-wide'>
+                                    <h2 className='mr-1 font-sans font-semibold'>Order Id:</h2> 
+                                    <p className='text-orange-600'>{selectedOrder._id}</p>
+                                </div>
+
+                                <div className="border-t py-3">
+                                    <div>
+                                        {selectedOrder.items.map((item, index) => (
+                                            <div key={index} className='tracking-wider'>
+                                                <div className="grid grid-cols-1 sm:grid-cols-5 items-center gap-3 sm:gap-1 ml-3">
+                                                    <img
+                                                        src={`http://localhost:7684/uploads/${item.image}`}
+                                                        className="w-40 h-40 object-cover rounded row-span-1"
+                                                    />
+                                                    <div className="col-span-4 sm:col-span-3 ml-3">
+                                                        <Typography variant="h6" color="blue-gray" className="text-base mb-1">
+                                                            {item.productName}
+                                                        </Typography>
+                                                        <Typography className="font-normal text-gray-800 mb-0.5">
+                                                            Size: {item.size}
+                                                        </Typography>
+                                                        <Typography className="font-normal text-gray-800 mb-0.5">
+                                                            Quantity: {item.productQuantity}
+                                                        </Typography>
+                                                        <Typography className="font-normal text-gray-800 mb-0.5">
+                                                            Price: ₱{item.price}
+                                                        </Typography>
+                                                    </div>
+                                                </div>
+                                                <hr className="h-px my-4 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className='tracking-wide'>
+                                        <div className="my-4 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <Typography className="text-gray-800">
+                                                    Subtotal
+                                                </Typography>
+                                                <Typography className="text-gray-800">
+                                                    ₱{selectedOrder.items.reduce((acc, item) => acc + item.price, 0)}
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                        <div className="my-4 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <Typography className="text-gray-800 font-normal">
+                                                    Shipping Fee
+                                                </Typography>
+                                                <Typography className="text-gray-800 font-normal">
+                                                    ₱{selectedOrder.shippingFee}
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                                            <Typography color="blue-gray" className="!font-semibold">
+                                                Total
+                                            </Typography>
+                                            <Typography color="blue-gray" className="!font-semibold">
+                                                ₱{selectedOrder.totalAmount}
+                                            </Typography>
+                                        </div>
+                                    </div>
+                                    <hr className="h-px my-10 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+                                    <h2 className='font-bold text-2xl font-sans md:mb-4'>Your Order is being shipped to</h2>
+                                    <div className='py-2'>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 tracking-tight">
+                                            <div>
+                                                <h2 className='font-semibold font-sans pb-2'>Shipping Address</h2>
+                                                <div className="space-y-1 mt-1">
+                                                    <Typography className="text-gray-800 font-normal">
+                                                        {selectedOrder.shippingLocation}
+                                                    </Typography>
+                                                    <Typography className="text-gray-800 font-normal">
+                                                        {selectedOrder.street}
+                                                    </Typography>
+                                                    <Typography className="text-gray-800 font-normal">
+                                                        {selectedOrder.zipCode}
+                                                    </Typography>
+                                                    <Typography className="text-gray-800 font-normal">
+                                                        {selectedOrder.address}
+                                                    </Typography>
+                                                    <Typography className="text-gray-800 font-normal">
+                                                        {selectedOrder.contactNumber}
+                                                    </Typography>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h2 className='font-semibold font-sans pb-2'>Payment Method</h2>
+                                                <div className="space-y-1 mt-1">
+                                                    <Typography className="text-gray-800 font-normal">
+                                                        {selectedOrder.paymentMethod}
+                                                    </Typography>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <p>No order selected</p>
                         )}
@@ -210,6 +360,24 @@ const Orders = () => {
                     </div>
                 </dialog>
 
+
+                <dialog id="cancel_order_modal" className="modal">
+                    <div className="modal-box">
+                        <h3 className="text-lg font-bold">Cancel Order</h3>
+                        <p>Are you sure you want to cancel this order?</p>
+                        <div className="modal-action">
+                            <button className="btn btn-error" onClick={handleCancelOrder}>
+                                Confirm
+                            </button>
+                            <button className="btn" onClick={() => document.getElementById('cancel_order_modal').close()}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </dialog>
+                
+
+    
             </div>
             <Footer />
         </>

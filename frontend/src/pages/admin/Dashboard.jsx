@@ -5,6 +5,7 @@ import axios from 'axios'
 
 const Dashboard = () => {
     const [product, setProduct] = useState([]);
+    const [loading, setLoading] = useState(true)
 
     const fetchProduct = async () => {
         try {
@@ -16,7 +17,9 @@ const Dashboard = () => {
         }
         } catch (error) {
         console.error('Error fetching products:', error);
-        }
+        }finally {
+            setLoading(false); // Stop loading after fetch
+          }
     };
 
     useEffect(() => {
@@ -47,7 +50,17 @@ const Dashboard = () => {
                     </li>
                 </ol>
             </nav>
-
+            {loading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+              <div class="flex items-center justify-center h-screen">
+                  <div class="relative">
+                      <div class="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                      <div class="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin">
+                      </div>
+                  </div>
+              </div>
+            </div>
+          )}
             <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="relative flex flex-col min-w-0 break-words bg-gradient-to-r from-blue-200 to-cyan-300 rounded-lg mb-6 xl:mb-0 shadow-base border">
                     <div className="flex-auto p-4">

@@ -56,7 +56,9 @@ const CheckOut = () => {
                 }
             } catch (error) {
                 console.error("Error fetching addresses:", error);
-            }
+            } finally {
+                setLoading(false); // Stop loading after fetch
+              }
         };
 
         useEffect(() => {
@@ -125,7 +127,9 @@ const CheckOut = () => {
             } catch (error) {
                 console.error('Error submitting address:', error);
                 alert('There was an error submitting the address');
-            }
+            }finally {
+                setLoading(false); // Stop loading after fetch
+              }
         };
 
       const handleDefaultChange = async (addressId) => {
@@ -149,7 +153,9 @@ const CheckOut = () => {
           );
         } catch (error) {
           console.error("Error updating default address:", error);
-        }
+        }finally {
+            setLoading(false); // Stop loading after fetch
+          }
       };
 
       const handleDeleteAddress = async (addressId) => {
@@ -166,7 +172,9 @@ const CheckOut = () => {
             } catch (error) {
                 console.error('Error deleting address:', error);
                 alert('There was an error deleting the address');
-            }
+            }finally {
+                setLoading(false); // Stop loading after fetch
+              }
         }
     };
 
@@ -270,7 +278,9 @@ const CheckOut = () => {
             console.error('Error submitting order:', error);
             const errorMessage = error.response?.data?.message || 'There was an error submitting your order. Please try again.';
             setError(errorMessage);
-        }
+        }finally {
+            setLoading(false); // Stop loading after fetch
+          }
     };
     
 
@@ -410,6 +420,17 @@ const CheckOut = () => {
                             )}
                         </div>
                     </div>
+                    {loading && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+                        <div class="flex items-center justify-center h-screen">
+                            <div class="relative">
+                                <div class="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                                <div class="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin">
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

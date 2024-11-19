@@ -12,7 +12,7 @@ const PlanningScheduling = () => {
   const modalRef = useRef(null); // Ref for the modal element
 
   // Pagination
-  const itemsPerPage = 5;
+  const itemsPerPage = 2;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(auditPlan.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -97,6 +97,18 @@ const PlanningScheduling = () => {
                 </ol>
             </nav>
             <h2 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl dark:text-gray-900">Planning & Scheduling</h2>
+
+            {loading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+              <div class="flex items-center justify-center h-screen">
+                  <div class="relative">
+                      <div class="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                      <div class="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin">
+                      </div>
+                  </div>
+              </div>
+            </div>
+          )}
             <div className="flex flex-col bg-white">
               <div className="-m-1.5 overflow-x-auto">
                 <div className="p-1.5 min-w-full inline-block align-middle">
@@ -127,6 +139,7 @@ const PlanningScheduling = () => {
                             <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Audit Title</th>
                             <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Audit Type</th>
                             <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Scope</th>
+                            <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Task</th>
                             <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Status</th>
                             <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Priority</th>
                             <th scope="col" className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500">Scheduled Date</th>
@@ -148,6 +161,21 @@ const PlanningScheduling = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{audit.AuditName}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{audit.AuditType}</td>
                             <td className="px-6 py-4  text-sm text-gray-800 dark:text-neutral-200">{audit.Scope}</td>
+                            {audit.Tasks && audit.Tasks.length > 0 ? (
+                              audit.Tasks.map((task, taskIndex) => (
+                                <tr key={`${audit._id}-${taskIndex}`}>
+                                  <td className="px-6 py-1 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-neutral-200">
+                                    {task.Description}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan="9" className="px-6 py-4 text-center text-sm text-gray-800 dark:text-neutral-200">
+                                  No tasks available
+                                </td>
+                              </tr>
+                            )}
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{audit.Status}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{audit.Priority}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-neutral-200">{new Date(audit.ScheduledDate).toLocaleDateString()}</td>

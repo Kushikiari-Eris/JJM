@@ -20,6 +20,7 @@ const AllProducts = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState(["All"]); 
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (selectedCategories.includes("All")) {
@@ -46,6 +47,8 @@ const AllProducts = () => {
       }
     } catch (error) {
       console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false); // Stop loading after fetch
     }
   };
 
@@ -145,6 +148,18 @@ const AllProducts = () => {
               </DialogPanel>
             </div>
           </Dialog>
+
+          {loading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+              <div class="flex items-center justify-center h-screen">
+                  <div class="relative">
+                      <div class="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                      <div class="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin">
+                      </div>
+                  </div>
+              </div>
+            </div>
+          )}
 
           <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">

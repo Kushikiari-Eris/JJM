@@ -10,16 +10,17 @@ import axios from 'axios'
 axios.defaults.withCredentials = true
 
 import { ThemeProvider } from "@material-tailwind/react";
+
  
 const root = ReactDOM.createRoot(document.getElementById("root"));
  
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true }}>
 
-        <App />
-   
+          <App />
+
       </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>

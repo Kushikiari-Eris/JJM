@@ -17,7 +17,7 @@ const OrderStatusBadge = ({ OrderStatus }) => {
       OrderStatusClasses = 'bg-green-100 text-green-800 text-xs font-medium me-2 px-3 py-2 rounded-lg dark:bg-green-900 dark:text-green-300'; 
       break;
     case 'Cancelled':
-      OrderStatusClasses = 'bg-green-100 text-green-800 text-xs font-medium me-2 px-3 py-2 rounded-lg dark:bg-green-900 dark:text-green-300'; 
+      OrderStatusClasses = 'bg-red-100 text-red-800 text-xs font-medium me-2 px-3 py-2 rounded-full dark:bg-red-900 dark:text-red-300'; 
       break;
     default:
       OrderStatusClasses = 'bg-gray-500 text-white'; // Default class

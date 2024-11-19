@@ -173,6 +173,33 @@ const confirmOrder = async (req, res) => {
     }
 };
 
+const cancelOrder = async (req, res) => {
+    const { orderId } = req.params;
+
+    try {
+        // Find the order by ID
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        // Check if the order can be cancelled
+        if (order.status === 'Cancelled') {
+            return res.status(400).json({ message: 'Order is already cancelled' });
+        }
+
+        // Update the order status to "Cancelled"
+        order.status = 'Cancelled';
+        await order.save();
+
+        res.status(200).json({ message: 'Order cancelled successfully', order });
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        res.status(500).json({ message: 'Error cancelling order', error: error.message });
+    }
+};
+
+
 
 
 
@@ -185,5 +212,6 @@ module.exports = {
     showOrdersByUser,
     showOrderById,
     updateOrderStatus,
-    confirmOrder
+    confirmOrder,
+    cancelOrder
 }

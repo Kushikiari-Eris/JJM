@@ -13,6 +13,7 @@ const ProductDetail = () => {
     const [totalPrice, setTotalPrice] = useState(0);
     const [selectedSize, setSelectedSize] = useState('');
     const [cartItems, setCartItems] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { addItemToCart, cartItemCount } = useCartContext();
     const navigate = useNavigate();
 
@@ -39,7 +40,9 @@ const ProductDetail = () => {
             }
         } catch (error) {
             console.error('Error fetching product:', error);
-        }
+        }finally {
+            setLoading(false); // Stop loading after fetch
+          }
     };
 
     const fetchCartItems = async (userId) => {
@@ -52,7 +55,9 @@ const ProductDetail = () => {
             }
         } catch (error) {
             console.error('Error fetching cart items:', error);
-        }
+        }finally {
+            setLoading(false); // Stop loading after fetch
+          }
     };
 
     useEffect(() => {
@@ -154,7 +159,9 @@ const ProductDetail = () => {
                 }
             } catch (error) {
                 console.error('Error adding item to cart:', error);
-            }
+            }finally {
+                setLoading(false); // Stop loading after fetch
+              }
         }
     };
     
@@ -166,6 +173,17 @@ const ProductDetail = () => {
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
+            {loading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+              <div class="flex items-center justify-center h-screen">
+                  <div class="relative">
+                      <div class="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-200"></div>
+                      <div class="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-blue-500 animate-spin">
+                      </div>
+                  </div>
+              </div>
+            </div>
+          )}
             <main className="flex-grow py-16 px-8">
                 {product ? (
                     <div className="mx-auto container grid grid-cols-1 md:grid-cols-2 gap-8">
